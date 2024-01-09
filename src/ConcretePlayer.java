@@ -1,11 +1,23 @@
+import java.util.Objects;
+
 public class ConcretePlayer implements Player{
+
+    private String color;
+    private int wins = 0;
+
+    public ConcretePlayer(String color){
+        this.color = color;
+    }
     @Override
     public boolean isPlayerOne() {
-        return false;
+        if (Objects.equals(this.color, "White")){
+            return false;
+        }
+        return true;
     }
 
     @Override
     public int getWins() {
-        return 0;
+        return this.wins;
     }
 }

@@ -1,2 +1,7 @@
-public class Pawn {
+public class Pawn extends ConcretePiece{
+
+    public Pawn(Player player){
+        super(player, "♟");
+
+    }
 }

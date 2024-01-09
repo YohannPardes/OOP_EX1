@@ -46,6 +46,21 @@ public class GameLogic implements PlayableLogic {
     }
     @Override
     public boolean move(Position a, Position b) {
+        //check that the move is valid
+        if (!move_is_valid(a, b)){
+            return false;
+        }
+        // handling eating situation
+
+
+        // if the move is a valid move then move the piece
+        this.move_piece(a, b);
+        //update next player
+        this.black_turn = !this.black_turn;
+        return true;
+    }
+
+    private boolean move_is_valid(Position a, Position b) {
         int[] move_data = this.move_data(a, b);
         int delta_x = move_data[0];
         int delta_y = move_data[1];
@@ -53,30 +68,30 @@ public class GameLogic implements PlayableLogic {
         int dir_y = move_data[3];
         //check that the right color piece has been selected
         if (getPieceAtPosition(a).getOwner().isPlayerOne() != this.black_turn){
-            return false;
+            return true;
         }
 
         // if it's a valid cross move
         if (delta_x * delta_y != 0) {
-            return false;
+            return true;
         }
 
         // check for blocking pieces
         // get y-axis tiles
         for (int i = a.Y + dir_y; i != b.Y; i += dir_y) {
             if (this.getPieceAtPosition(new Position(i, a.X)) != null) {
-                return false;
+                return true;
             }
         }
         // get x axis tiles
         for (int i = a.X + dir_x; i != b.X; i += dir_x) {
             if (this.getPieceAtPosition(new Position(a.Y, i)) != null) {
-                return false;
+                return true;
             }
         }
         // checking target tile is empty
         if (this.getPieceAtPosition(b) != null) {
-            return false;
+            return true;
         }
         //check for a pawn moving to a corner
         if (Objects.equals(getPieceAtPosition(a).getType(), "♟")) {
@@ -86,17 +101,10 @@ public class GameLogic implements PlayableLogic {
                     b.same(new Position(0, 10)) ||
                     b.same(new Position(0, 0))
             ){
-                return false;
+                return true;
             }
         }
-
-
-
-        // if the move is a valid move then move the piece
-        this.move_piece(a, b);
-        //update next player
-        this.black_turn = !this.black_turn;
-        return true;
+        return false;
     }
 
     private int[] move_data(Position a, Position b) {
@@ -119,9 +127,6 @@ public class GameLogic implements PlayableLogic {
         return new int[] {delta_x, delta_y, dir_x, dir_y};
     }
 
-    private record Result(int delta_x, int delta_y, int dir_x, int dir_y) {
-    }
-
     private void move_piece(Position a, Position b){
         Piece moving_piece = this.getPieceAtPosition(a);
         board_data[a.X][a.Y] = null;
@@ -129,6 +134,9 @@ public class GameLogic implements PlayableLogic {
 
     }
 
+    private void eating_piece(Position a, Position b){
+                
+    }
     @Override
     public Piece getPieceAtPosition(Position position) {
         return board_data[position.X][position.Y];
@@ -146,6 +154,20 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public boolean isGameFinished() {
+        // check for white win
+
+        // check for black win
+
+        return false;
+    }
+
+    private boolean white_win(){
+        // all the black pieces has been eaten
+
+        return false;
+    }
+    private boolean black_win(){
+        // the king is surrounded
 
         return false;
     }

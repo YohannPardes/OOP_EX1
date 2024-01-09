@@ -4,10 +4,11 @@ public class GameLogic implements PlayableLogic {
 
 
     private final int board_size = 11;
-    private ConcretePiece[][] board_data = new ConcretePiece[board_size][board_size];
+    private Piece[][] board_data = new ConcretePiece[board_size][board_size];
 
     private Player attacking_player = new ConcretePlayer("Black");
     private Player defending_player = new ConcretePlayer("White");
+    private boolean black_turn = true;
     public GameLogic(){
 
         // adding the white pieces
@@ -45,6 +46,60 @@ public class GameLogic implements PlayableLogic {
     }
     @Override
     public boolean move(Position a, Position b) {
+        int[] move_data = this.move_data(a, b);
+        int delta_x = move_data[0];
+        int delta_y = move_data[1];
+        int dir_x = move_data[2];
+        int dir_y = move_data[3];
+        //check that the right color piece has been selected
+        if (getPieceAtPosition(a).getOwner().isPlayerOne() != this.black_turn){
+            return false;
+        }
+
+        // if it's a valid cross move
+        if (delta_x * delta_y != 0) {
+            return false;
+        }
+
+        // check for blocking pieces
+        // get y-axis tiles
+        for (int i = a.Y + dir_y; i != b.Y; i += dir_y) {
+            if (this.getPieceAtPosition(new Position(i, a.X)) != null) {
+                return false;
+            }
+        }
+        // get x axis tiles
+        for (int i = a.X + dir_x; i != b.X; i += dir_x) {
+            if (this.getPieceAtPosition(new Position(a.Y, i)) != null) {
+                return false;
+            }
+        }
+        // checking target tile is empty
+        if (this.getPieceAtPosition(b) != null) {
+            return false;
+        }
+        //check for a pawn moving to a corner
+        if (Objects.equals(getPieceAtPosition(a).getType(), "♟")) {
+            if (
+                    b.same(new Position(10, 0)) ||
+                    b.same(new Position(10, 10)) ||
+                    b.same(new Position(0, 10)) ||
+                    b.same(new Position(0, 0))
+            ){
+                return false;
+            }
+        }
+
+
+
+        // if the move is a valid move then move the piece
+        this.move_piece(a, b);
+        //update next player
+        this.black_turn = !this.black_turn;
+        return true;
+    }
+
+    private int[] move_data(Position a, Position b) {
         int delta_x = b.X - a.X;
         int delta_y = b.Y - a.Y;
         int dir_x;
@@ -61,44 +116,17 @@ public class GameLogic implements PlayableLogic {
         catch (Exception ArithmeticException){
             dir_y = 0;
         }
-        // if it's a valid cross move
-        if (delta_x*delta_y == 0) {
-            // check for blocking pieces
-            // get y-axis tiles
-            for (int i = a.Y + dir_y; i != b.Y; i += dir_y) {
-                if (this.getPieceAtPosition(new Position(i, a.X)) != null) {
-                    return false;
-                }
-            }
-            // get x axis tiles
-            for (int i = a.X + dir_x; i != b.X; i += dir_x) {
-                if (this.getPieceAtPosition(new Position(a.Y, i)) != null) {
-                    return false;
-                }
-            }
-            // checking target tile is empty
-            if (this.getPieceAtPosition(b) != null) {
-                return false;
-            }
-            //check for a pawn moving to a corner
-            if (Objects.equals(getPieceAtPosition(a).getType(), "♟")) {
-                if (
-                        b.same(new Position(10, 0)) ||
-                        b.same(new Position(10, 10)) ||
-                        b.same(new Position(0, 10)) ||
-                        b.same(new Position(0, 0))
-                ){
-                    return false;
-                }
-            }
-        }
-        else
-        {
-            return false;
-        }
+        return new int[] {delta_x, delta_y, dir_x, dir_y};
+    }
 
+    private record Result(int delta_x, int delta_y, int dir_x, int dir_y) {
+    }
 
-        return true;
+    private void move_piece(Position a, Position b){
+        Piece moving_piece = this.getPieceAtPosition(a);
+        board_data[a.X][a.Y] = null;
+        board_data[b.X][b.Y] = moving_piece;
+
     }
 
     @Override
@@ -118,6 +146,7 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public boolean isGameFinished() {
+
         return false;
     }
 

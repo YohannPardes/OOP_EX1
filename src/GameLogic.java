@@ -5,13 +5,12 @@ import java.util.Stack;
 
 public class GameLogic implements PlayableLogic {
 
-
     private final int board_size = 11;
     private ConcretePiece[][] board_data = new ConcretePiece[board_size][board_size];
 
-    private final Player attacking_player = new ConcretePlayer("Black");
-    private final Player defending_player = new ConcretePlayer("White");
-    private boolean black_turn = true;
+    private final Player attacking_player = new ConcretePlayer("White");
+    private final Player defending_player = new ConcretePlayer("Black");
+    private boolean black_turn = false;
     private final Stack<ConcretePiece[][]> move_history = new Stack<>();
 
     public GameLogic() {
@@ -230,7 +229,7 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public boolean isSecondPlayerTurn() {
-        return false;
+        return this.black_turn;
     }
 
     @Override

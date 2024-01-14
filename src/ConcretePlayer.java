@@ -1,6 +1,6 @@
 import java.util.Objects;
 
-public class ConcretePlayer implements Player{
+public class ConcretePlayer implements Player {
 
     private String color;
     private int wins = 0;
@@ -20,4 +20,11 @@ public class ConcretePlayer implements Player{
     public int getWins() {
         return this.wins;
     }
+
+    public boolean isWall() {
+        return Objects.equals(this.color, "Wall");
+    }
 }
+
+
+

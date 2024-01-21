@@ -1,6 +1,4 @@
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Stack;
+import java.util.*;
 
 public class GameLogic implements PlayableLogic {
 
@@ -12,15 +10,17 @@ public class GameLogic implements PlayableLogic {
     private boolean black_turn = false;
     private final Stack<ConcretePiece[][]> move_history = new Stack<>();
 
+    private final ConcretePiece[] piece_list = new ConcretePiece[13 + 24];
+
     public GameLogic() {
 
         // adding the white pieces
         this.SettingUpWhite();
 
         // adding the black pieces
-        SettingUpBlack();
+        this.SettingUpBlack();
 
-        System.out.println(this);
+        this.PrintRecap();
     }
 
     private void SettingUpBlack() {
@@ -36,11 +36,15 @@ public class GameLogic implements PlayableLogic {
                 {10, 3}, {10, 4}, {10, 5}, {10, 6}, {10, 7}
         };
 
-        for (int i = 0; i<positions.length; i += 1){
+        for (int i = 0; i < positions.length; i += 1) {
             int x = positions[i][0];
             int y = positions[i][1];
-            this.board_data[x][y] = new Pawn(this.attacking_player, i+1);
+            ConcretePiece added_piece = new Pawn(this.attacking_player, i + 1, new Position(x, y));
+            this.board_data[x][y] = added_piece;
+            this.piece_list[13 + i] = added_piece;
+            this.board_data[x][y] = added_piece;
         }
+
     }
 
     private void SettingUpWhite() {
@@ -51,13 +55,18 @@ public class GameLogic implements PlayableLogic {
                 {6, 4}, {6, 5}, {6, 6},
                 {7, 5}};
 
-        for (int i = 0; i<positions.length; i += 1){
+        for (int i = 0; i < positions.length; i += 1) {
             int x = positions[i][0];
             int y = positions[i][1];
-            this.board_data[x][y] = new Pawn(this.defending_player, i+1);
+
+            ConcretePiece added_piece = new Pawn(this.defending_player, i + 1, new Position(x, y));
+            this.board_data[x][y] = added_piece;
+            this.piece_list[i] = added_piece;
         }
 
-        this.board_data[5][5] = new King(this.defending_player, 7);
+        ConcretePiece added_piece = new King(this.defending_player, 7, new Position(5, 5));
+        this.board_data[5][5] = added_piece;
+        this.piece_list[6] = added_piece;
     }
 
     @Override
@@ -69,6 +78,7 @@ public class GameLogic implements PlayableLogic {
 
         // storing the board before the move is applied
         this.move_history.add(getDeepCopyData(this.board_data));
+
 
         // if the move is a valid move then move the piece
         this.move_piece(a, b);
@@ -153,6 +163,9 @@ public class GameLogic implements PlayableLogic {
         board_data[a.X][a.Y] = null;
         board_data[b.X][b.Y] = (ConcretePiece) moving_piece;
 
+        // keeping track of the piece move
+        ((ConcretePiece) moving_piece).addMove(b);
+
     }
 
     /**
@@ -174,7 +187,7 @@ public class GameLogic implements PlayableLogic {
                 ConcretePlayer first_neighbor_owner = (ConcretePlayer) first_neighbor.getOwner();
                 ConcretePlayer second_neighbor_owner = (ConcretePlayer) second_neighbor.getOwner();
 
-                if (piece_owner!=first_neighbor_owner) {
+                if (piece_owner != first_neighbor_owner) {
 
                     boolean is_sandwiched = (piece_owner == second_neighbor_owner);
                     boolean is_stuck_between_walls = (second_neighbor_owner.isWall() || isCorner(two_aside));
@@ -224,17 +237,19 @@ public class GameLogic implements PlayableLogic {
     @Override
     public boolean isGameFinished() {
         // check for white win
-        if (this.white_win()){
+        if (this.white_win()) {
             System.out.println("White won !");
             ConcretePlayer white = (ConcretePlayer) this.getSecondPlayer();
             white.addWin();
+            this.PrintRecap();
             return true;
         }
 
-        if (this.black_win()){
+        if (this.black_win()) {
             System.out.println("Black won !");
             ConcretePlayer black = (ConcretePlayer) this.getSecondPlayer();
             black.addWin();
+            this.PrintRecap();
             return true;
         }
 
@@ -244,7 +259,7 @@ public class GameLogic implements PlayableLogic {
     private boolean white_win() {
 
         // there is only 2 black pieces left
-         boolean check_1 = this.onlyTwoBlackPieces();
+        boolean check_1 = this.onlyTwoBlackPieces();
 
         // the king has reached a corner
         boolean check_2 = this.KingIsInCorner();
@@ -252,14 +267,14 @@ public class GameLogic implements PlayableLogic {
         return check_1 || check_2;
     }
 
-    private boolean onlyTwoBlackPieces(){
+    private boolean onlyTwoBlackPieces() {
         int black_count = 0;
 
-        for(int i =0; i<this.board_size; i += 1){
-            for (int j = 0; j<this.board_size; j += 1){
-                if (board_data[i][j] != null && board_data[i][j].getOwner() == this.attacking_player){
+        for (int i = 0; i < this.board_size; i += 1) {
+            for (int j = 0; j < this.board_size; j += 1) {
+                if (board_data[i][j] != null && board_data[i][j].getOwner() == this.attacking_player) {
                     black_count += 1;
-                    if (black_count > 2){
+                    if (black_count > 2) {
                         return false;
                     }
                 }
@@ -275,8 +290,8 @@ public class GameLogic implements PlayableLogic {
                 getPieceAtPosition(10, 0),
                 getPieceAtPosition(0, 0)};
 
-        for (Piece piece : corner_pieces){
-            if (piece != null && Objects.equals(piece.getType(), "♚")){
+        for (Piece piece : corner_pieces) {
+            if (piece != null && Objects.equals(piece.getType(), "♚")) {
                 return true;
             }
         }
@@ -292,21 +307,21 @@ public class GameLogic implements PlayableLogic {
         return this.KingIsSurrounded(king_pos);
     }
 
-    private boolean KingIsSurrounded(Position pos){
+    private boolean KingIsSurrounded(Position pos) {
 
         int x = pos.X;
         int y = pos.Y;
 
         //up
-        boolean up = (x-1<0 || (board_data[x-1][y] != null && board_data[x-1][y].getOwner() == this.attacking_player));
+        boolean up = (x - 1 < 0 || (board_data[x - 1][y] != null && board_data[x - 1][y].getOwner() == this.attacking_player));
 
         //right
-        boolean right = (y+1>this.board_data.length || (board_data[x][y+1] != null && board_data[x][y+1].getOwner() == this.attacking_player));
+        boolean right = (y + 1 > this.board_data.length || (board_data[x][y + 1] != null && board_data[x][y + 1].getOwner() == this.attacking_player));
 
         // down
-        boolean down = (x+1>this.board_data.length || (board_data[x+1][y] != null && board_data[x+1][y].getOwner() == this.attacking_player));
+        boolean down = (x + 1 > this.board_data.length || (board_data[x + 1][y] != null && board_data[x + 1][y].getOwner() == this.attacking_player));
 
-        boolean left = (y-1<0 || (board_data[x][y-1] != null && board_data[x][y-1].getOwner() == this.attacking_player));
+        boolean left = (y - 1 < 0 || (board_data[x][y - 1] != null && board_data[x][y - 1].getOwner() == this.attacking_player));
 
         return (up && right && down && left);
 
@@ -316,7 +331,7 @@ public class GameLogic implements PlayableLogic {
         Position king_pos = null;
         for (int i = 0; i < this.board_size; i++) {
             for (int j = 0; j < this.board_size; j++) {
-                if (this.board_data[i][j] != null && Objects.equals(this.board_data[i][j].getType(), "♚")){
+                if (this.board_data[i][j] != null && Objects.equals(this.board_data[i][j].getType(), "♚")) {
                     return new Position(i, j);
                 }
             }
@@ -343,8 +358,7 @@ public class GameLogic implements PlayableLogic {
             ConcretePiece[][] last_state = move_history.pop();
             this.black_turn = !this.black_turn;
             this.board_data = getDeepCopyData(last_state);
-        }
-        catch (Exception EmptyStackException){
+        } catch (Exception EmptyStackException) {
 
         }
     }
@@ -356,6 +370,7 @@ public class GameLogic implements PlayableLogic {
 
     /**
      * A tool for deep copying a 2d array
+     *
      * @param original - the original array
      * @return a deepcopy of the array
      */
@@ -372,14 +387,13 @@ public class GameLogic implements PlayableLogic {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         String string = "";
-        for (ConcretePiece[] row : this.board_data){
-            for (ConcretePiece piece : row){
-                if (piece != null){
+        for (ConcretePiece[] row : this.board_data) {
+            for (ConcretePiece piece : row) {
+                if (piece != null) {
                     string += piece.toString();
-                }
-                else{
+                } else {
                     string += " . ";
                 }
 
@@ -388,5 +402,31 @@ public class GameLogic implements PlayableLogic {
         }
 
         return string;
+    }
+
+    private void PrintRecap() {
+        // print move history
+        this.Print_move_history();
+
+        // print kill history
+        //todo
+
+        // print moving distance history
+        // todo
+
+        // print tile history
+        // todo
+    }
+
+    private void Print_move_history() {
+
+        Comparator<ConcretePiece> compare_moves = new Compare_moves();
+        Arrays.sort(this.piece_list, compare_moves.reversed());
+        for (ConcretePiece piece : this.piece_list) {
+            if (piece.pos_hist().contains("), (")){
+                System.out.println(piece.pos_hist());
+            }
+
+        }
     }
 }

@@ -1,7 +1,7 @@
 public class Wall extends ConcretePiece{
 
     Wall(){
-        super(new ConcretePlayer("Wall"), "Wall");
+        super(new ConcretePlayer("Wall"), "Wall", new Position(-1, -1));
     }
     @Override
     public Player getOwner() {
@@ -12,4 +12,11 @@ public class Wall extends ConcretePiece{
     public String getType() {
         return super.getType();
     }
+
+    @Override
+    public String pos_hist() {
+        return null;
+    }
+
+
 }

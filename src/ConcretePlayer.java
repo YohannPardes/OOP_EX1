@@ -28,6 +28,11 @@ public class ConcretePlayer implements Player {
     public void addWin() {
         this.wins ++;
     }
+
+    @Override
+    public String toString(){
+        return Objects.equals(this.color, "White") ? "D" : "A";
+    }
 }
 
 

@@ -10,7 +10,7 @@ public class Position {
 
     public boolean isInside(int limits){
 
-        boolean max = this.X >= limits|| this.Y >= limits;
+        boolean max = this.X >= limits || this.Y >= limits;
         boolean min = this.X < 0 || this.Y < 0;
 
         return max && min;

@@ -1,7 +1,15 @@
 public class Pawn extends ConcretePiece{
 
-    public Pawn(Player player){
-        super(player, "♟");
+    private final int id;
 
+    public Pawn(Player player, int id){
+        super(player, "♟");
+        this.id = id;
+
+    }
+
+    @Override
+    public String toString(){
+        return Integer.toString(this.id) + " ";
     }
 }

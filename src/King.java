@@ -1,6 +1,14 @@
 public class King extends ConcretePiece{
 
-    public King(Player player){
+    private final int id;
+
+    public King(Player player, int id){
         super(player, "♚");
+        this.id = id;
+    }
+
+    @Override
+    public String toString(){
+        return Integer.toString(this.id) + " ";
     }
 }

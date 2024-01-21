@@ -1,5 +1,4 @@
 import java.util.Arrays;
-import java.util.EmptyStackException;
 import java.util.Objects;
 import java.util.Stack;
 
@@ -16,36 +15,49 @@ public class GameLogic implements PlayableLogic {
     public GameLogic() {
 
         // adding the white pieces
-        // king and first layer of pawn
-        for (int i = -1; i <= 1; i += 1) {
-            for (int j = -1; j <= 1; j += 1) {
-                if (i == 0 & j == 0) {
-                    board_data[5 + i][5 + j] = new King(this.defending_player);
-                } else {
-                    board_data[5 + i][5 + j] = new Pawn(this.defending_player);
-                }
-            }
-        }
-        // the four farest white pawns
-        board_data[5][7] = new Pawn(this.defending_player);
-        board_data[7][5] = new Pawn(this.defending_player);
-        board_data[5][3] = new Pawn(this.defending_player);
-        board_data[3][5] = new Pawn(this.defending_player);
+        this.SettingUpWhite();
 
         // adding the black pieces
-        for (int i = 3; i <= 7; i += 1) {
-            board_data[0][i] = new Pawn(this.attacking_player);
-            board_data[i][0] = new Pawn(this.attacking_player);
-            board_data[10][i] = new Pawn(this.attacking_player);
-            board_data[i][10] = new Pawn(this.attacking_player);
+        SettingUpBlack();
+
+        System.out.println(this);
+    }
+
+    private void SettingUpBlack() {
+        int[][] positions = {
+                {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7},
+                {1, 5},
+                {3, 0}, {3, 10},
+                {4, 0}, {4, 10},
+                {5, 0}, {5, 1}, {5, 9}, {5, 10},
+                {6, 0}, {6, 10},
+                {7, 0}, {7, 10},
+                {9, 5},
+                {10, 3}, {10, 4}, {10, 5}, {10, 6}, {10, 7}
+        };
+
+        for (int i = 0; i<positions.length; i += 1){
+            int x = positions[i][0];
+            int y = positions[i][1];
+            this.board_data[x][y] = new Pawn(this.attacking_player, i+1);
+        }
+    }
+
+    private void SettingUpWhite() {
+        // adding the white pieces
+        int[][] positions = {{3, 5},
+                {4, 4}, {4, 5}, {4, 6},
+                {5, 3}, {5, 4}, {5, 5}, {5, 6}, {5, 7},
+                {6, 4}, {6, 5}, {6, 6},
+                {7, 5}};
+
+        for (int i = 0; i<positions.length; i += 1){
+            int x = positions[i][0];
+            int y = positions[i][1];
+            this.board_data[x][y] = new Pawn(this.defending_player, i+1);
         }
 
-        board_data[1][5] = new Pawn(this.attacking_player);
-        board_data[5][1] = new Pawn(this.attacking_player);
-        board_data[9][5] = new Pawn(this.attacking_player);
-        board_data[5][9] = new Pawn(this.attacking_player);
-
-
+        this.board_data[5][5] = new King(this.defending_player, 7);
     }
 
     @Override
@@ -179,7 +191,7 @@ public class GameLogic implements PlayableLogic {
         try {
             return board_data[position.X][position.Y];
         } catch (Exception IndexOutOfBoundsException) {
-            return new ConcretePiece(new ConcretePlayer("Wall"), "Wall");
+            return new Wall();
         }
     }
 
@@ -187,7 +199,7 @@ public class GameLogic implements PlayableLogic {
         try {
             return board_data[X][Y];
         } catch (Exception IndexOutOfBoundsException) {
-            return new ConcretePiece(new ConcretePlayer("Wall"), "Wall");
+            return new Wall();
         }
     }
 
@@ -211,20 +223,105 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public boolean isGameFinished() {
-        // check for white or black win
-        return this.white_win() || this.black_win();
+        // check for white win
+        if (this.white_win()){
+            System.out.println("White won !");
+            ConcretePlayer white = (ConcretePlayer) this.getSecondPlayer();
+            white.addWin();
+            return true;
+        }
+
+        if (this.black_win()){
+            System.out.println("Black won !");
+            ConcretePlayer black = (ConcretePlayer) this.getSecondPlayer();
+            black.addWin();
+            return true;
+        }
+
+        return false;
     }
 
     private boolean white_win() {
-        // all the black pieces has been eaten
 
+        // there is only 2 black pieces left
+         boolean check_1 = this.onlyTwoBlackPieces();
+
+        // the king has reached a corner
+        boolean check_2 = this.KingIsInCorner();
+
+        return check_1 || check_2;
+    }
+
+    private boolean onlyTwoBlackPieces(){
+        int black_count = 0;
+
+        for(int i =0; i<this.board_size; i += 1){
+            for (int j = 0; j<this.board_size; j += 1){
+                if (board_data[i][j] != null && board_data[i][j].getOwner() == this.attacking_player){
+                    black_count += 1;
+                    if (black_count > 2){
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean KingIsInCorner() {
+        Piece[] corner_pieces = {
+                getPieceAtPosition(0, 10),
+                getPieceAtPosition(10, 10),
+                getPieceAtPosition(10, 0),
+                getPieceAtPosition(0, 0)};
+
+        for (Piece piece : corner_pieces){
+            if (piece != null && piece.getType() == "♚"){
+                return true;
+            }
+        }
         return false;
     }
 
     private boolean black_win() {
-        // the king is surrounded
 
-        return false;
+        //finding the position of the king
+        Position king_pos = getKingPos();
+
+        //determine if the king is surrounded
+        return this.KingIsSurrounded(king_pos);
+    }
+
+    private boolean KingIsSurrounded(Position pos){
+
+        int x = pos.X;
+        int y = pos.Y;
+
+        //up
+        boolean up = (x-1<0 || (board_data[x-1][y] != null && board_data[x-1][y].getOwner() == this.attacking_player));
+
+        //right
+        boolean right = (y+1>this.board_data.length || (board_data[x][y+1] != null && board_data[x][y+1].getOwner() == this.attacking_player));
+
+        // down
+        boolean down = (x+1>this.board_data.length || (board_data[x+1][y] != null && board_data[x+1][y].getOwner() == this.attacking_player));
+
+        boolean left = (y-1<0 || (board_data[x][y-1] != null && board_data[x][y-1].getOwner() == this.attacking_player));
+
+        return (up && right && down && left);
+
+    }
+
+    private Position getKingPos() {
+        Position king_pos = null;
+        for (int i = 0; i < this.board_size; i++) {
+            for (int j = 0; j < this.board_size; j++) {
+                if (this.board_data[i][j] != null && this.board_data[i][j].getType() == "♚"){
+                    return new Position(i, j);
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -272,5 +369,24 @@ public class GameLogic implements PlayableLogic {
             result[i] = Arrays.copyOf(original[i], original[i].length);
         }
         return result;
+    }
+
+    @Override
+    public String toString(){
+        String string = "";
+        for (ConcretePiece[] row : this.board_data){
+            for (ConcretePiece piece : row){
+                if (piece != null){
+                    string += piece.toString();
+                }
+                else{
+                    string += " . ";
+                }
+
+            }
+            string += "\n";
+        }
+
+        return string;
     }
 }

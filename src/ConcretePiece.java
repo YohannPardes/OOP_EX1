@@ -1,4 +1,4 @@
-public class ConcretePiece implements Piece{
+public abstract class ConcretePiece implements Piece{
 
     private final Player owner;
     private final String type;

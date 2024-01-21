@@ -24,6 +24,10 @@ public class ConcretePlayer implements Player {
     public boolean isWall() {
         return Objects.equals(this.color, "Wall");
     }
+
+    public void addWin() {
+        this.wins ++;
+    }
 }
 
 

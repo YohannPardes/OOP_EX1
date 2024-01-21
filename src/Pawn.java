@@ -10,6 +10,6 @@ public class Pawn extends ConcretePiece{
 
     @Override
     public String toString(){
-        return Integer.toString(this.id) + " ";
+        return this.id + " ";
     }
 }

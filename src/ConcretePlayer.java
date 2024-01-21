@@ -2,7 +2,7 @@ import java.util.Objects;
 
 public class ConcretePlayer implements Player {
 
-    private String color;
+    private final String color;
     private int wins = 0;
 
     public ConcretePlayer(String color){

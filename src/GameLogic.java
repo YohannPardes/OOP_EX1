@@ -276,7 +276,7 @@ public class GameLogic implements PlayableLogic {
                 getPieceAtPosition(0, 0)};
 
         for (Piece piece : corner_pieces){
-            if (piece != null && piece.getType() == "♚"){
+            if (piece != null && Objects.equals(piece.getType(), "♚")){
                 return true;
             }
         }
@@ -316,7 +316,7 @@ public class GameLogic implements PlayableLogic {
         Position king_pos = null;
         for (int i = 0; i < this.board_size; i++) {
             for (int j = 0; j < this.board_size; j++) {
-                if (this.board_data[i][j] != null && this.board_data[i][j].getType() == "♚"){
+                if (this.board_data[i][j] != null && Objects.equals(this.board_data[i][j].getType(), "♚")){
                     return new Position(i, j);
                 }
             }

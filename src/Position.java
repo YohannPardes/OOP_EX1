@@ -22,6 +22,6 @@ public class Position {
 
     @Override
     public String toString() {
-        return Integer.toString(this.X) + "," + Integer.toString(this.Y);
+        return this.X + "," + this.Y;
     }
 }

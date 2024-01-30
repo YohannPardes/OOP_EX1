@@ -18,5 +18,8 @@ public class Wall extends ConcretePiece{
         return null;
     }
 
-
+    @Override
+    protected String get_Name() {
+        return "";
+    }
 }

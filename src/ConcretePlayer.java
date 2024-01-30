@@ -5,8 +5,13 @@ public class ConcretePlayer implements Player {
     private final String color;
     private int wins = 0;
 
+    private boolean isWinner = false;
+
+    private String name;
+
     public ConcretePlayer(String color){
         this.color = color;
+
     }
     @Override
     public boolean isPlayerOne() {
@@ -32,6 +37,14 @@ public class ConcretePlayer implements Player {
     @Override
     public String toString(){
         return Objects.equals(this.color, "White") ? "D" : "A";
+    }
+
+    public void setWinner(boolean val){
+        this.isWinner = val;
+    }
+
+    public boolean getWinner(){
+        return this.isWinner;
     }
 }
 

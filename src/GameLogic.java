@@ -5,22 +5,27 @@ public class GameLogic implements PlayableLogic {
     private final int board_size = 11;
     private ConcretePiece[][] board_data = new ConcretePiece[board_size][board_size];
 
+    private ArrayList<MySet<ConcretePiece>> tile_history = new ArrayList<>();
+
     private final Player attacking_player = new ConcretePlayer("White");
     private final Player defending_player = new ConcretePlayer("Black");
     private boolean black_turn = false;
-    private final Stack<ConcretePiece[][]> move_history = new Stack<>();
+    private Stack<ConcretePiece[][]> move_history = new Stack<>();
 
-    private final ConcretePiece[] piece_list = new ConcretePiece[13 + 24];
+    private ConcretePiece[] piece_list = new ConcretePiece[13 + 24];
 
     public GameLogic() {
+
+        //preparing the tiles history
+        for (int i = 0; i < board_size*board_size; i++) {
+            this.tile_history.add(new MySet<>(new Position(i / board_size, i % board_size)));
+        }
 
         // adding the white pieces
         this.SettingUpWhite();
 
         // adding the black pieces
         this.SettingUpBlack();
-
-        this.PrintRecap();
     }
 
     private void SettingUpBlack() {
@@ -41,10 +46,9 @@ public class GameLogic implements PlayableLogic {
             int y = positions[i][1];
             ConcretePiece added_piece = new Pawn(this.attacking_player, i + 1, new Position(x, y));
             this.board_data[x][y] = added_piece;
+            this.tile_history.get(y+x*board_size).add(added_piece);
             this.piece_list[13 + i] = added_piece;
-            this.board_data[x][y] = added_piece;
         }
-
     }
 
     private void SettingUpWhite() {
@@ -59,12 +63,16 @@ public class GameLogic implements PlayableLogic {
             int x = positions[i][0];
             int y = positions[i][1];
 
-            ConcretePiece added_piece = new Pawn(this.defending_player, i + 1, new Position(x, y));
-            this.board_data[x][y] = added_piece;
-            this.piece_list[i] = added_piece;
+            if (!(x == 5 && y == 5)){
+                ConcretePiece added_piece = new Pawn(this.defending_player, i + 1, new Position(x, y));
+                this.tile_history.get(y+x*board_size).add(added_piece);
+                this.board_data[x][y] = added_piece;
+                this.piece_list[i] = added_piece;
+            }
         }
 
         ConcretePiece added_piece = new King(this.defending_player, 7, new Position(5, 5));
+        this.tile_history.get(5+5*board_size).add(added_piece);
         this.board_data[5][5] = added_piece;
         this.piece_list[6] = added_piece;
     }
@@ -73,6 +81,7 @@ public class GameLogic implements PlayableLogic {
     public boolean move(Position a, Position b) {
         //check that the move is valid
         if (!move_is_valid(a, b)) {
+            System.out.println("not valid");
             return false;
         }
 
@@ -82,6 +91,7 @@ public class GameLogic implements PlayableLogic {
 
         // if the move is a valid move then move the piece
         this.move_piece(a, b);
+        tile_history.get(b.Y + b.X * board_size).add((ConcretePiece)getPieceAtPosition(b));
 
 
         // handling eating situation
@@ -118,7 +128,7 @@ public class GameLogic implements PlayableLogic {
         }
         // get x axis tiles
         for (int i = a.X + dir_x; i != b.X; i += dir_x) {
-            if (this.getPieceAtPosition(new Position(1, a.Y)) != null) {
+            if (this.getPieceAtPosition(new Position(i, a.Y)) != null) {
                 return false;
             }
         }
@@ -165,15 +175,19 @@ public class GameLogic implements PlayableLogic {
 
         // keeping track of the piece move
         ((ConcretePiece) moving_piece).addMove(b);
-
     }
 
     /**
      * given the previous and the new position of the piece handle the eating
      */
-    private void eat(Position b) {
+    private int eat(Position b) {
 
         ConcretePlayer piece_owner = (ConcretePlayer) getPieceAtPosition(b).getOwner();
+        ConcretePiece eating_piece = (ConcretePiece) getPieceAtPosition(b);
+
+        if (Objects.equals(eating_piece.getType(), "♚")){
+            return 0;
+        }
 
         //                  up,      right,  down,    left
         int[][] offsets = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
@@ -193,10 +207,12 @@ public class GameLogic implements PlayableLogic {
                     boolean is_stuck_between_walls = (second_neighbor_owner.isWall() || isCorner(two_aside));
                     if (is_sandwiched || ((is_stuck_between_walls) && !first_neighbor_owner.isWall())) {
                         eatPieceAtPosition(one_aside);
+                        eating_piece.add_Kill();
                     }
                 }
             }
         }
+        return 0;
     }
 
     @Override
@@ -218,6 +234,7 @@ public class GameLogic implements PlayableLogic {
 
     public void eatPieceAtPosition(int X, int Y) {
         board_data[X][Y] = null;
+
     }
 
     public void eatPieceAtPosition(Position p) {
@@ -238,18 +255,20 @@ public class GameLogic implements PlayableLogic {
     public boolean isGameFinished() {
         // check for white win
         if (this.white_win()) {
-            System.out.println("White won !");
             ConcretePlayer white = (ConcretePlayer) this.getSecondPlayer();
             white.addWin();
+            white.setWinner(true);
             this.PrintRecap();
+            white.setWinner(false);
             return true;
         }
 
         if (this.black_win()) {
-            System.out.println("Black won !");
             ConcretePlayer black = (ConcretePlayer) this.getSecondPlayer();
             black.addWin();
+            black.setWinner(true);
             this.PrintRecap();
+            black.setWinner(false);
             return true;
         }
 
@@ -272,13 +291,16 @@ public class GameLogic implements PlayableLogic {
 
         for (int i = 0; i < this.board_size; i += 1) {
             for (int j = 0; j < this.board_size; j += 1) {
-                if (board_data[i][j] != null && board_data[i][j].getOwner() == this.attacking_player) {
+                if (board_data[i][j] != null && Objects.equals(board_data[i][j].getOwner().toString(), this.attacking_player.toString())) {
                     black_count += 1;
                     if (black_count > 2) {
                         return false;
                     }
                 }
             }
+        }
+        if (black_count > 2) {
+            return false;
         }
         return true;
     }
@@ -349,7 +371,11 @@ public class GameLogic implements PlayableLogic {
         GameLogic new_game = new GameLogic();
 
         this.board_data = getDeepCopyData(new_game.board_data);
-        this.black_turn = true;
+        this.tile_history = new_game.tile_history;
+        this.move_history = new_game.move_history;
+        this.piece_list = new_game.piece_list;
+
+        this.black_turn = false;
     }
 
     @Override
@@ -394,7 +420,7 @@ public class GameLogic implements PlayableLogic {
                 if (piece != null) {
                     string += piece.toString();
                 } else {
-                    string += " . ";
+                    string += " .";
                 }
 
             }
@@ -407,26 +433,74 @@ public class GameLogic implements PlayableLogic {
     private void PrintRecap() {
         // print move history
         this.Print_move_history();
+        this.print_stars(75);
 
         // print kill history
-        //todo
+        this.Print_kill_history();
+        this.print_stars(75);
 
         // print moving distance history
-        // todo
+        this.Print_dist_history();
+        this.print_stars(75);
 
         // print tile history
-        // todo
+        this.Print_tile_history();
+        this.print_stars(75);
+
+    }
+
+    private void Print_kill_history(){
+
+        Comparator<ConcretePiece> compare_kills = new Compare_kills();
+        Arrays.sort(this.piece_list, compare_kills);
+        for (ConcretePiece piece : this.piece_list) {
+            if (piece.kills > 0){
+                System.out.println(piece.kill_hist());
+            }
+        }
     }
 
     private void Print_move_history() {
-
+        // todo - fix that the winning team is printed first and not only by move order
         Comparator<ConcretePiece> compare_moves = new Compare_moves();
-        Arrays.sort(this.piece_list, compare_moves.reversed());
+        Arrays.sort(this.piece_list, compare_moves);
         for (ConcretePiece piece : this.piece_list) {
             if (piece.pos_hist().contains("), (")){
                 System.out.println(piece.pos_hist());
             }
-
         }
+    }
+
+    private void Print_dist_history(){
+
+        Comparator<ConcretePiece> compare_dist = new Compare_dist();
+        Arrays.sort(this.piece_list, compare_dist);
+        for (ConcretePiece piece : this.piece_list) {
+            if (piece.calculate_moves_distance() > 0){
+                System.out.println(piece.dist_hist());
+            }
+        }
+    }
+
+    private void Print_tile_history(){
+
+        Comparator<MySet<ConcretePiece>> compare_tile = new Compare_tiles();
+        this.tile_history.sort(compare_tile.reversed());
+        for (int i = 0; i < this.tile_history.size(); i+=1) {
+            MySet<ConcretePiece> single_tile_hist = this.tile_history.get(i);
+            if (single_tile_hist.size() > 1){
+                System.out.println("(" + (single_tile_hist.pos.X) + ", " + (single_tile_hist.pos.Y) +")"+ single_tile_hist.size() +" pieces");
+            }
+        }
+    }
+
+    private void print_stars(int num)
+    {
+        String string = "";
+        for (int i = 0; i < num; i++) {
+            string += "*";
+        }
+
+        System.out.println(string);
     }
 }

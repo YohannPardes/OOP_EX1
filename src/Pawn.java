@@ -15,12 +15,16 @@ public class Pawn extends ConcretePiece{
 
     public String pos_hist(){
         String string = "";
-        string += this.getOwner().toString() + this.id + ": [";
+        string +=  this.get_Name() + "[";
         for (int i = 0; i < this.move_history.size() - 1; i++) {
             string += move_history.get(i)+ ", ";
         }
         string += move_history.get(this.move_history.size()-1) + "]";
 
         return string;
+    }
+
+    protected String get_Name(){
+        return this.getOwner().toString() + this.id + ": ";
     }
 }

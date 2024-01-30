@@ -110,7 +110,7 @@ public class GameLogic implements PlayableLogic {
         int dir_x = move_data[2];
         int dir_y = move_data[3];
         //check that the right color piece has been selected
-        if (getPieceAtPosition(a).getOwner().isPlayerOne() != this.black_turn) {
+        if (getPieceAtPosition(a).getOwner().isPlayerOne() == this.black_turn) {
             return false;
         }
 
@@ -180,13 +180,13 @@ public class GameLogic implements PlayableLogic {
     /**
      * given the previous and the new position of the piece handle the eating
      */
-    private int eat(Position b) {
+    private void eat(Position b) {
 
         ConcretePlayer piece_owner = (ConcretePlayer) getPieceAtPosition(b).getOwner();
         ConcretePiece eating_piece = (ConcretePiece) getPieceAtPosition(b);
 
         if (Objects.equals(eating_piece.getType(), "♚")){
-            return 0;
+            return;
         }
 
         //                  up,      right,  down,    left
@@ -212,7 +212,6 @@ public class GameLogic implements PlayableLogic {
                 }
             }
         }
-        return 0;
     }
 
     @Override
@@ -243,12 +242,12 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public Player getFirstPlayer() {
-        return this.defending_player;
+        return this.attacking_player;
     }
 
     @Override
     public Player getSecondPlayer() {
-        return this.attacking_player;
+        return this.defending_player;
     }
 
     @Override
@@ -298,9 +297,6 @@ public class GameLogic implements PlayableLogic {
                     }
                 }
             }
-        }
-        if (black_count > 2) {
-            return false;
         }
         return true;
     }
@@ -398,7 +394,7 @@ public class GameLogic implements PlayableLogic {
      * A tool for deep copying a 2d array
      *
      * @param original - the original array
-     * @return a deepcopy of the array
+     * @return a deep copy of the array
      */
     public static ConcretePiece[][] getDeepCopyData(ConcretePiece[][] original) {
         if (original == null) {
@@ -461,7 +457,6 @@ public class GameLogic implements PlayableLogic {
     }
 
     private void Print_move_history() {
-        // todo - fix that the winning team is printed first and not only by move order
         Comparator<ConcretePiece> compare_moves = new Compare_moves();
         Arrays.sort(this.piece_list, compare_moves);
         for (ConcretePiece piece : this.piece_list) {
@@ -494,8 +489,7 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
-    private void print_stars(int num)
-    {
+    private void print_stars(int num) {
         String string = "";
         for (int i = 0; i < num; i++) {
             string += "*";

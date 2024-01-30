@@ -1,5 +1,6 @@
 import java.util.*;
 
+//todo - fix the print for 1, 2, 3 prints
 public class GameLogic implements PlayableLogic {
 
     private final int board_size = 11;
@@ -7,9 +8,9 @@ public class GameLogic implements PlayableLogic {
 
     private ArrayList<MySet<ConcretePiece>> tile_history = new ArrayList<>();
 
-    private final Player attacking_player = new ConcretePlayer("White");
-    private final Player defending_player = new ConcretePlayer("Black");
-    private boolean black_turn = false;
+    private final Player attacking_player = new ConcretePlayer("Black");
+    private final Player defending_player = new ConcretePlayer("White");
+    private boolean black_turn = true;
     private Stack<ConcretePiece[][]> move_history = new Stack<>();
 
     private ConcretePiece[] piece_list = new ConcretePiece[13 + 24];
@@ -81,7 +82,6 @@ public class GameLogic implements PlayableLogic {
     public boolean move(Position a, Position b) {
         //check that the move is valid
         if (!move_is_valid(a, b)) {
-            System.out.println("not valid");
             return false;
         }
 
@@ -243,12 +243,12 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public Player getFirstPlayer() {
-        return this.attacking_player;
+        return this.defending_player;
     }
 
     @Override
     public Player getSecondPlayer() {
-        return this.defending_player;
+        return this.attacking_player;
     }
 
     @Override
@@ -375,7 +375,7 @@ public class GameLogic implements PlayableLogic {
         this.move_history = new_game.move_history;
         this.piece_list = new_game.piece_list;
 
-        this.black_turn = false;
+        this.black_turn = true;
     }
 
     @Override

@@ -16,9 +16,9 @@ public class ConcretePlayer implements Player {
     @Override
     public boolean isPlayerOne() {
         if (Objects.equals(this.color, "White")){
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     @Override

@@ -25,7 +25,6 @@ public class Compare_moves implements Comparator<ConcretePiece> {
             return sort_by_moves(CP1, CP2);
         }
 
-
         return Integer.compare(CP1.move_history.size(), CP2.move_history.size());
     }
 

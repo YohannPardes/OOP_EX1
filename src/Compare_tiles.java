@@ -21,8 +21,8 @@ public class Compare_tiles implements Comparator<MySet<ConcretePiece>> {
 
     private int equal_decider(MySet<ConcretePiece> o1, MySet<ConcretePiece> o2){
         if (o1.pos.Y != o2.pos.Y){
-            return Integer.compare(o1.pos.Y, o2.pos.Y); // The X of in the board
+            return Integer.compare(o1.pos.X, o2.pos.X); // The X of in the board
         }
-        else return Integer.compare(o1.pos.X, o2.pos.X); // the Y in the board
+        else return Integer.compare(o1.pos.Y, o2.pos.Y); // the Y in the board
     }
 }

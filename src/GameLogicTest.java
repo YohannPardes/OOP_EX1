@@ -68,6 +68,8 @@ class GameLogicTest {
                 assertTrue(result); // Ensure each move is successful
             }
 
+            ((GameLogic) gameLogic).PrintRecap();
+
             // Restore the original System.out
             System.setOut(System.out);
 

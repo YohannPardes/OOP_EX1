@@ -45,7 +45,7 @@ public class GameLogic implements PlayableLogic {
         for (int i = 0; i < positions.length; i += 1) {
             int x = positions[i][0];
             int y = positions[i][1];
-            ConcretePiece added_piece = new Pawn(this.attacking_player, i + 1, new Position(x, y));
+            ConcretePiece added_piece = new Pawn(this.attacking_player, i + 1, new Position(y, x));
             this.board_data[x][y] = added_piece;
             this.tile_history.get(y+x*board_size).add(added_piece);
             this.piece_list[13 + i] = added_piece;
@@ -65,9 +65,9 @@ public class GameLogic implements PlayableLogic {
             int y = positions[i][1];
 
             if (!(x == 5 && y == 5)){
-                ConcretePiece added_piece = new Pawn(this.defending_player, i + 1, new Position(x, y));
+                ConcretePiece added_piece = new Pawn(this.defending_player, i + 1, new Position(y, x));
                 this.tile_history.get(y+x*board_size).add(added_piece);
-                this.board_data[x][y] = added_piece;
+                this.board_data[y][x] = added_piece;
                 this.piece_list[i] = added_piece;
             }
         }
@@ -87,7 +87,6 @@ public class GameLogic implements PlayableLogic {
 
         // storing the board before the move is applied
         this.move_history.add(getDeepCopyData(this.board_data));
-
 
         // if the move is a valid move then move the piece
         this.move_piece(a, b);
@@ -334,10 +333,10 @@ public class GameLogic implements PlayableLogic {
         boolean up = (x - 1 < 0 || (board_data[x - 1][y] != null && board_data[x - 1][y].getOwner() == this.attacking_player));
 
         //right
-        boolean right = (y + 1 > this.board_data.length || (board_data[x][y + 1] != null && board_data[x][y + 1].getOwner() == this.attacking_player));
+        boolean right = (y + 1 >= this.board_data.length || (board_data[x][y + 1] != null && board_data[x][y + 1].getOwner() == this.attacking_player));
 
         // down
-        boolean down = (x + 1 > this.board_data.length || (board_data[x + 1][y] != null && board_data[x + 1][y].getOwner() == this.attacking_player));
+        boolean down = (x + 1 >= this.board_data.length || (board_data[x + 1][y] != null && board_data[x + 1][y].getOwner() == this.attacking_player));
 
         boolean left = (y - 1 < 0 || (board_data[x][y - 1] != null && board_data[x][y - 1].getOwner() == this.attacking_player));
 
@@ -426,7 +425,7 @@ public class GameLogic implements PlayableLogic {
         return string;
     }
 
-    private void PrintRecap() {
+    public void PrintRecap() {
         // print move history
         this.Print_move_history();
         this.print_stars(75);

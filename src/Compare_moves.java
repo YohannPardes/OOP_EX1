@@ -10,15 +10,13 @@ public class Compare_moves implements Comparator<ConcretePiece> {
     @Override
     public int compare(ConcretePiece CP1, ConcretePiece CP2) {
 
-
-
         ConcretePlayer P1 = (ConcretePlayer) CP1.getOwner();
         ConcretePlayer P2 = (ConcretePlayer) CP2.getOwner();
 
-        if (P1.getWinner() && !P2.getWinner()){
+        if (P1.getWinner() == !P2.getWinner() && P1.getWinner()){
             return -1; // printed before
         }
-        else if (!P1.getWinner() && P2.getWinner()){
+        else if (P1.getWinner() == !P2.getWinner() && P2.getWinner()){
             return 1; // printed after
         }
         else if (P1.getWinner() == P2.getWinner()){

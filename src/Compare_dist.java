@@ -27,15 +27,14 @@ public class Compare_dist implements Comparator<ConcretePiece> {
             return -1;
         }
         //sort them by winner
-        else if (first.getWinner() && !second.getWinner()){
-            return -1; // he appear first if he is winner
+        if (first.getWinner() == !second.getWinner() && first.getWinner()){
+            return 1; // printed before
         }
-        else if (!first.getWinner() && second.getWinner()){
-            return 1; // he appear second if he is loser
+        else if (first.getWinner() == !second.getWinner() && second.getWinner()){
+            return -1; // printed after
         }
-        else if (first.getWinner() == second.getWinner()){
-            return 0; // if they are equal about everything
+        else {
+            return 0;
         }
-        return 0;
     }
 }

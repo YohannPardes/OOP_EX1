@@ -43,9 +43,9 @@ public class GameLogic implements PlayableLogic {
         };
 
         for (int i = 0; i < positions.length; i += 1) {
-            int x = positions[i][0];
-            int y = positions[i][1];
-            ConcretePiece added_piece = new Pawn(this.attacking_player, i + 1, new Position(y, x));
+            int x = positions[i][1];
+            int y = positions[i][0];
+            ConcretePiece added_piece = new Pawn(this.attacking_player, i + 1, new Position(x, y));
             this.board_data[x][y] = added_piece;
             this.tile_history.get(y+x*board_size).add(added_piece);
             this.piece_list[13 + i] = added_piece;
@@ -61,13 +61,13 @@ public class GameLogic implements PlayableLogic {
                 {7, 5}};
 
         for (int i = 0; i < positions.length; i += 1) {
-            int x = positions[i][0];
-            int y = positions[i][1];
+            int x = positions[i][1];
+            int y = positions[i][0];
 
             if (!(x == 5 && y == 5)){
-                ConcretePiece added_piece = new Pawn(this.defending_player, i + 1, new Position(y, x));
+                ConcretePiece added_piece = new Pawn(this.defending_player, i + 1, new Position(x, y));
                 this.tile_history.get(y+x*board_size).add(added_piece);
-                this.board_data[y][x] = added_piece;
+                this.board_data[x][y] = added_piece;
                 this.piece_list[i] = added_piece;
             }
         }
@@ -96,7 +96,7 @@ public class GameLogic implements PlayableLogic {
         // handling eating situation
         this.eat(b);
 
-
+        isGameFinished();
         //update next player
         this.black_turn = !this.black_turn;
         return true;
@@ -261,8 +261,8 @@ public class GameLogic implements PlayableLogic {
             return true;
         }
 
-        if (this.black_win()) {
-            ConcretePlayer black = (ConcretePlayer) this.getSecondPlayer();
+        else if (this.black_win()) {
+            ConcretePlayer black = (ConcretePlayer) this.getFirstPlayer();
             black.addWin();
             black.setWinner(true);
             this.PrintRecap();

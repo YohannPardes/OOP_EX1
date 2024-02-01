@@ -1,3 +1,6 @@
+/**
+ * The Pawn class extending ConcretePiece
+ */
 public class Pawn extends ConcretePiece{
 
     private final int id;
@@ -8,11 +11,18 @@ public class Pawn extends ConcretePiece{
 
     }
 
+    /**
+     * @return "{ID} "
+     */
     @Override
     public String toString(){
         return this.id + " ";
     }
 
+    /**
+     * create the positoin history for this piece
+     * @return "{ID}: [(pos1x, pos1y), (pos2x, pos2y), (pos3x, pos3y)]
+     */
     public String pos_hist(){
         String string = "";
         string +=  this.get_Name() + "[";
@@ -24,6 +34,9 @@ public class Pawn extends ConcretePiece{
         return string;
     }
 
+    /**
+     * @return "owner + ID: "
+     */
     protected String get_Name(){
         return this.getOwner().toString() + this.id + ": ";
     }

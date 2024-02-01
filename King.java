@@ -1,3 +1,6 @@
+/**
+ * The King class extending the Concrete class
+ */
 public class King extends ConcretePiece{
 
     private final int id;
@@ -7,6 +10,10 @@ public class King extends ConcretePiece{
         this.id = id;
     }
 
+    /**
+     * return "7 "
+     * @return
+     */
     @Override
     public String toString(){
         return this.id + " ";
@@ -22,6 +29,10 @@ public class King extends ConcretePiece{
 
         return string;
     }
+    /**
+     * return "K7: "
+     * @return
+     */
     protected String get_Name(){
         return "K" + this.id + ": ";
     }

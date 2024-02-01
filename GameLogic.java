@@ -57,6 +57,9 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
+    /**
+     * the function is setting up the white pieces on the board
+     */
     private void SettingUpWhite() {
         // adding the white pieces
         int[][] positions = {{3, 5},
@@ -164,6 +167,11 @@ public class GameLogic implements PlayableLogic {
         return true;
     }
 
+    /**
+     * given a position b return true or false wether the position is a corner or not
+     * @param b
+     * @return
+     */
     private static boolean isCorner(Position b) {
         return b.same(new Position(10, 0)) ||
                 b.same(new Position(10, 10)) ||
@@ -197,8 +205,8 @@ public class GameLogic implements PlayableLogic {
 
     /**
      * swap function in the board for moving a piece
-     * @param a
-     * @param b
+     * @param a - the initial position
+     * @param b - the ending position
      */
     private void move_piece(Position a, Position b) {
         Piece moving_piece = this.getPieceAtPosition(a);
@@ -229,10 +237,12 @@ public class GameLogic implements PlayableLogic {
             ConcretePiece first_neighbor = (ConcretePiece) getPieceAtPosition(one_aside);
             ConcretePiece second_neighbor = (ConcretePiece) getPieceAtPosition(two_aside);
 
+            // if not null and not king
             if (first_neighbor != null && second_neighbor != null && !first_neighbor.getClass().getName().equals("King")) {
                 ConcretePlayer first_neighbor_owner = (ConcretePlayer) first_neighbor.getOwner();
                 ConcretePlayer second_neighbor_owner = (ConcretePlayer) second_neighbor.getOwner();
 
+                // if the close tile is an ennemy
                 if (piece_owner != first_neighbor_owner) {
 
                     boolean is_sandwiched = (piece_owner == second_neighbor_owner);
@@ -246,6 +256,11 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
+    /**
+     * given a position get the piece at this position
+     * @param position - the wanted position
+     * @return - Piece the piece at this position or null if none
+     */
     @Override
     public Piece getPieceAtPosition(Position position) {
         try {
@@ -255,6 +270,12 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
+    /**
+     * Given a position get the piece at this position
+     * @param X the wanted X of the position
+     * @param Y the wanted Y of the position
+     * @return - Piece the piece at this position or null if none
+     */
     public Piece getPieceAtPosition(int X, int Y) {
         try {
             return board_data[X][Y];
@@ -263,25 +284,41 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
-    public void eatPieceAtPosition(int X, int Y) {
+    /**
+     * delete the piece at position X, Y
+     */
+    private void eatPieceAtPosition(int X, int Y) {
         board_data[X][Y] = null;
 
     }
 
-    public void eatPieceAtPosition(Position p) {
+    /**
+     * delete the piece at position P
+     */
+    private void eatPieceAtPosition(Position p) {
         eatPieceAtPosition(p.X, p.Y);
     }
 
+    /**
+     * Retur the first player
+     */
     @Override
     public Player getFirstPlayer() {
         return this.attacking_player;
     }
 
+    /**
+     * Retur the second player
+     */
     @Override
     public Player getSecondPlayer() {
         return this.defending_player;
     }
 
+    /**
+     * checking separately for whit or black win and handling everython if the game is finished
+     * @return true if the game is finished or false if not
+     */
     @Override
     public boolean isGameFinished() {
         // check for white win
@@ -293,7 +330,7 @@ public class GameLogic implements PlayableLogic {
             white.setWinner(false);
             return true;
         }
-
+        // check for black win
         else if (this.black_win()) {
             ConcretePlayer black = (ConcretePlayer) this.getFirstPlayer();
             black.addWin();
@@ -306,6 +343,10 @@ public class GameLogic implements PlayableLogic {
         return false;
     }
 
+    /**
+     * check are the whites won by eating all the black pieces or by successfuly going with the king to a corner
+     * @return true if the white pieces won and false if not
+     */
     private boolean white_win() {
 
         // there is only 2 black pieces left
@@ -317,6 +358,10 @@ public class GameLogic implements PlayableLogic {
         return check_1 || check_2;
     }
 
+    /**
+     * check is there 2 blakck pieces or not to determine the end of a game
+     * @return true or false if the condition is fulfilled
+     */
     private boolean onlyTwoBlackPieces() {
         int black_count = 0;
 
@@ -333,6 +378,9 @@ public class GameLogic implements PlayableLogic {
         return true;
     }
 
+    /**
+     * return true if the king is in a corner or false if not
+     */
     private boolean KingIsInCorner() {
         Piece[] corner_pieces = {
                 getPieceAtPosition(0, 10),
@@ -348,6 +396,10 @@ public class GameLogic implements PlayableLogic {
         return false;
     }
 
+    /**
+     * check are the black won by surrounding the white king
+     * @return true if the black pieces won and false if not
+     */
     private boolean black_win() {
 
         //finding the position of the king
@@ -357,6 +409,11 @@ public class GameLogic implements PlayableLogic {
         return this.KingIsSurrounded(king_pos);
     }
 
+    /**
+     * check whether the white king is surrounded or not
+     * @param pos - the position of the king
+     * @return true if the king is surrounded and false if not
+     */
     private boolean KingIsSurrounded(Position pos) {
 
         int x = pos.X;
@@ -389,11 +446,17 @@ public class GameLogic implements PlayableLogic {
         return null;
     }
 
+    /**
+     * return true or false wether it is the second player turn or not
+     */
     @Override
     public boolean isSecondPlayerTurn() {
         return this.black_turn;
     }
 
+    /**
+     * reset the game board and all the variables that keep track of a game
+     */
     @Override
     public void reset() {
         GameLogic new_game = new GameLogic();
@@ -406,6 +469,9 @@ public class GameLogic implements PlayableLogic {
         this.black_turn = true;
     }
 
+    /**
+     * This function undo a move in the board, currently not working with the second part of the exercise
+     */
     @Override
     public void undoLastMove() {
         try {
@@ -417,6 +483,10 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
+    /**
+     * retur the board size
+     * @return the size of the board
+     */
     @Override
     public int getBoardSize() {
         return this.board_size;
@@ -440,6 +510,10 @@ public class GameLogic implements PlayableLogic {
         return result;
     }
 
+    /**
+     * a String representation of the board for debugging essentialy
+     * @return
+     */
     @Override
     public String toString() {
         String string = "";
@@ -458,6 +532,15 @@ public class GameLogic implements PlayableLogic {
         return string;
     }
 
+    /**
+     * PART 2 of the exercice -
+     *
+     * Print the history of a game:
+     * 1- the history of each pieces move
+     * 2- the number of kill each piece has done
+     * 3- the total distance of each piece
+     * 4- the history of each piece that as stepped on a specific tile
+     */
     public void PrintRecap() {
         // print move history
         this.Print_move_history();
@@ -477,6 +560,9 @@ public class GameLogic implements PlayableLogic {
 
     }
 
+    /**
+     * print the kill history accordingly after sorting it accordingly to the exercice
+     */
     private void Print_kill_history(){
 
         Comparator<ConcretePiece> compare_kills = new Compare_kills();
@@ -488,6 +574,9 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
+    /**
+     * print the move history accordingly after sorting it accordingly to the exercice
+     */
     private void Print_move_history() {
         Comparator<ConcretePiece> compare_moves = new Compare_moves();
         Arrays.sort(this.piece_list, compare_moves);
@@ -498,6 +587,9 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
+    /**
+     * print the distance history accordingly after sorting it accordingly to the exercice
+     */
     private void Print_dist_history(){
 
         Comparator<ConcretePiece> compare_dist = new Compare_dist();
@@ -509,6 +601,9 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
+    /**
+     * print the tile history accordingly after sorting it accordingly to the exercice
+     */
     private void Print_tile_history(){
 
         Comparator<MySet<ConcretePiece>> compare_tile = new Compare_tiles();
@@ -521,6 +616,10 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
+    /**
+     * print stars to seperate each part of the exercice
+     * @param num - the number of starts to print
+     */
     private void print_stars(int num) {
         String string = "";
         for (int i = 0; i < num; i++) {

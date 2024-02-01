@@ -61,6 +61,9 @@ public class ConcretePlayer implements Player {
         this.isWinner = val;
     }
 
+    /**
+     * @return return true is the player is a winner
+     */
     public boolean getWinner(){
         return this.isWinner;
     }

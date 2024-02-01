@@ -1,6 +1,8 @@
 import java.util.*;
 
-//todo - fix the print for 1, 2, 3 prints
+/**
+ * The main class that control the logic and the game during the game
+ */
 public class GameLogic implements PlayableLogic {
 
     private final int board_size = 11;
@@ -29,6 +31,9 @@ public class GameLogic implements PlayableLogic {
         this.SettingUpBlack();
     }
 
+    /**
+     * using an array of x, y value4s assigning the black pieces accordingly
+     */
     private void SettingUpBlack() {
         int[][] positions = {
                 {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7},
@@ -46,9 +51,9 @@ public class GameLogic implements PlayableLogic {
             int x = positions[i][1];
             int y = positions[i][0];
             ConcretePiece added_piece = new Pawn(this.attacking_player, i + 1, new Position(x, y));
-            this.board_data[x][y] = added_piece;
-            this.tile_history.get(y+x*board_size).add(added_piece);
-            this.piece_list[13 + i] = added_piece;
+            this.board_data[x][y] = added_piece; //add to board
+            this.tile_history.get(y+x*board_size).add(added_piece); // add to tile history
+            this.piece_list[13 + i] = added_piece; // add to piece list
         }
     }
 
@@ -72,12 +77,19 @@ public class GameLogic implements PlayableLogic {
             }
         }
 
+        // adding the king separately
         ConcretePiece added_piece = new King(this.defending_player, 7, new Position(5, 5));
         this.tile_history.get(5+5*board_size).add(added_piece);
         this.board_data[5][5] = added_piece;
         this.piece_list[6] = added_piece;
     }
 
+    /**
+     * given a starting position and an ending position it's handling the move
+     * @param a The starting position of the piece.
+     * @param b The destination position for the piece.
+     * @return true if the move is valid otherwise  return false
+     */
     @Override
     public boolean move(Position a, Position b) {
         //check that the move is valid
@@ -96,18 +108,27 @@ public class GameLogic implements PlayableLogic {
         // handling eating situation
         this.eat(b);
 
+        // checking whether the game ended
         isGameFinished();
+
         //update next player
         this.black_turn = !this.black_turn;
         return true;
     }
 
+    /**
+     * given two positiopn return  true if the move from a to b is legal otherwise return false
+     * @param a starting position
+     * @param b ending position
+     * @return
+     */
     private boolean move_is_valid(Position a, Position b) {
         int[] move_data = this.move_data(a, b);
         int delta_x = move_data[0];
         int delta_y = move_data[1];
         int dir_x = move_data[2];
         int dir_y = move_data[3];
+
         //check that the right color piece has been selected
         if (getPieceAtPosition(a).getOwner().isPlayerOne() == this.black_turn) {
             return false;
@@ -135,6 +156,7 @@ public class GameLogic implements PlayableLogic {
         if (this.getPieceAtPosition(b) != null) {
             return false;
         }
+
         //check for a pawn moving to a corner
         if (Objects.equals(getPieceAtPosition(a).getType(), "♟")) {
             return !isCorner(b);
@@ -149,6 +171,12 @@ public class GameLogic implements PlayableLogic {
                 b.same(new Position(0, 0));
     }
 
+    /**
+     * an helper function to move
+     * @param a
+     * @param b
+     * @return
+     */
     private int[] move_data(Position a, Position b) {
         int delta_x = b.X - a.X;
         int delta_y = b.Y - a.Y;
@@ -167,6 +195,11 @@ public class GameLogic implements PlayableLogic {
         return new int[]{delta_x, delta_y, dir_x, dir_y};
     }
 
+    /**
+     * swap function in the board for moving a piece
+     * @param a
+     * @param b
+     */
     private void move_piece(Position a, Position b) {
         Piece moving_piece = this.getPieceAtPosition(a);
         board_data[a.X][a.Y] = null;
